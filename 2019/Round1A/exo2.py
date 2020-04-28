@@ -32,12 +32,12 @@ for t in range(1, T+1):
 
     eq = []
     for n in [5, 7, 11, 13, 17, 18]:
-        print(*[n]*18, flush=True)
+        print(" ".join(str(n) for _ in range(18)), flush=True)
         a = sum(int(x) for x in input().split()) % n
         eq.append((a, n))
 
     res, _ = chinese_theorem_inv(eq)
-    print(res % M, flush=True)
+    print(res % (M+1), flush=True)
 
     if int(input()) == -1:
         exit()
