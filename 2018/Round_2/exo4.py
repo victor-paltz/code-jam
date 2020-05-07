@@ -4,6 +4,8 @@ import sys
 import numpy as np
 from collections import Counter
 
+from scipy.ndimage.measurements import label
+
 
 def readstr(): return sys.stdin.readline().strip()
 
@@ -31,11 +33,11 @@ def connected_components(mat, value):
     mark = [[0 for j in range(m)] for i in range(n)]
     mark_counter = 0
 
+    seen = set()
     for i in range(n):
         for j in range(m):
             if mat[i][j] == value and not mark[i][j]:
                 mark_counter += 1
-                seen = set()
                 queue = [(i, j)]
                 while queue:
                     i1, j1 = queue.pop()
@@ -47,7 +49,13 @@ def connected_components(mat, value):
     return mark
 
 
-def get_rules(data):
+def connected_components2(mat, value):
+    structure = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    comp, _ = label(data2 == value, structure)
+    return comp
+
+
+def get_patterns(data):
 
     rules = set()
 
@@ -118,12 +126,11 @@ for t in range(1, T+1):
 
     data = np.array(data)
 
-    rules = get_rules(data)
+    rules = get_patterns(data)
 
     best = 0
 
     for i in range(R+1):
-        # print(i)
         for j in range(C+1):
             for rule in rules:
                 data2 = data.copy()
@@ -132,7 +139,12 @@ for t in range(1, T+1):
                 data2[i:, :j] = data[i:, :j] == rule[2]
                 data2[i:, j:] = data[i:, j:] == rule[3]
 
-                comp = connected_components(data2, True)
+                if np.count_nonzero(data2) <= best:
+                    continue
+
+                #comp = connected_components(data2, True)
+                comp = connected_components2(data2, True)
+
                 c = Counter(x for lin in comp for x in lin)
                 c[0] = -1
 
