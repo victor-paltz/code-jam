@@ -1,8 +1,9 @@
 
 import sys
+from collections import Counter
+from random import sample
 
 import numpy as np
-from collections import Counter
 
 from scipy.ndimage.measurements import label
 
@@ -51,7 +52,7 @@ def connected_components(mat, value):
 
 def connected_components2(mat, value):
     structure = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
-    comp, _ = label(data2 == value, structure)
+    comp, _ = label(mat == value, structure)
     return comp
 
 
@@ -130,9 +131,23 @@ for t in range(1, T+1):
 
     best = 0
 
-    for i in range(R+1):
-        for j in range(C+1):
+    for i in [0, 1]:
+        if (i, i, i, i) in rules:
+            rules.remove((i, i, i, i))
+            comp = connected_components2(data == i, True)
+            c = Counter(x for lin in comp for x in lin)
+            c[0] = -1
+            best = max(best, max(c.values()))
+
+    for i in sample(range(R+1), R+1):
+        for j in sample(range(C+1), C+1):
             for rule in rules:
+                if sum(rule[:2]) in [0, 2] and sum(rule[2:]) in [0, 2]:
+                    if j != 0:
+                        continue
+                if rule[0]+rule[2] in [0, 2] and rule[1]+rule[3] in [0, 2]:
+                    if i != 0:
+                        continue
                 data2 = data.copy()
                 data2[:i, :j] = data[:i, :j] == rule[0]
                 data2[:i, j:] = data[:i, j:] == rule[1]
